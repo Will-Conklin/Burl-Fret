@@ -1,22 +1,26 @@
 import * as fs from 'fs';
-import { Client, Collection, Message } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, Events } from 'discord.js';
+import * as dotenv from 'dotenv';
 import { Command } from './types/command';
-import { Config } from './types/config';
+import logger from './utils/logger';
 
-let config: Config;
-try {
-    config = require('./config.json');
-} catch {
-    console.error('Missing config.json. Copy config.example.json to config.json and fill in your bot token.');
+// Load environment variables
+dotenv.config();
+
+const prefix = process.env.COMMAND_PREFIX || '!';
+const token = process.env.DISCORD_TOKEN;
+
+if (!token) {
+    logger.error('Missing DISCORD_TOKEN environment variable. Please create a .env file based on .env.example');
     process.exit(1);
 }
 
-const { prefix, token } = config;
-
 const client = new Client({
-    ws: {
-        intents: ['GUILDS', 'GUILD_MESSAGES'],
-    },
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+    ],
 }) as Client & { commands: Collection<string, Command> };
 
 client.commands = new Collection<string, Command>();
@@ -28,16 +32,17 @@ if (fs.existsSync(commandsPath)) {
     for (const file of commandFiles) {
         const command: Command = require(`./commands/${file}`);
         client.commands.set(command.name, command);
+        logger.info(`Loaded command: ${command.name}`);
     }
 } else {
-    console.warn('commands/ directory not found; skipping command load.');
+    logger.warn('commands/ directory not found; skipping command load.');
 }
 
-client.once('ready', () => {
-    console.log('Ready!');
+client.once(Events.ClientReady, (readyClient) => {
+    logger.info(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-client.on('message', async (message: Message) => {
+client.on(Events.MessageCreate, async (message) => {
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
 
@@ -50,9 +55,10 @@ client.on('message', async (message: Message) => {
 
     try {
         await command.execute(message, args);
+        logger.info(`Command executed: ${commandName} by ${message.author.tag}`);
     } catch (err) {
-        console.error(`Command failed: ${commandName}`, err);
-        message.channel.send({embed: {color: 'RED', description: 'Something went wrong while running that command.'}});
+        logger.error(`Command failed: ${commandName}`, err);
+        message.reply('Something went wrong while running that command.');
     }
 });
 

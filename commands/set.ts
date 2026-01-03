@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { Command } from '../types/command';
 
 const setCommand: Command = {
@@ -6,42 +6,42 @@ const setCommand: Command = {
     description: 'Set a member nickname.',
     async execute(message: Message, args?: string[]) {
         if (!message.guild) {
-            return message.channel.send({embed: {color: 'RED', description: 'This command can only be used in a server.'}});
+            return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('This command can only be used in a server.')] });
         }
 
-        if (!message.member || !message.member.hasPermission('MANAGE_NICKNAMES')) {
-            return message.channel.send({embed: {color: 'RED', description: 'You need MANAGE_NICKNAMES to use this command.'}});
+        if (!message.member || !message.member.permissions.has(PermissionFlagsBits.ManageNicknames)) {
+            return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('You need MANAGE_NICKNAMES to use this command.')] });
         }
 
-        if (!message.guild.me || !message.guild.me.hasPermission('MANAGE_NICKNAMES')) {
-            return message.channel.send({embed: {color: 'RED', description: 'I need MANAGE_NICKNAMES to change nicknames.'}});
+        if (!message.guild.members.me || !message.guild.members.me.permissions.has(PermissionFlagsBits.ManageNicknames)) {
+            return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('I need MANAGE_NICKNAMES to change nicknames.')] });
         }
 
         const user = message.mentions.users.first();
-        if (!user) return message.channel.send({embed: {color: 'RED', description: 'You need to mention the user!'}});
+        if (!user) return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('You need to mention the user!')] });
 
         if (!args || args.length < 2) {
-            return message.channel.send({embed: {color: 'RED', description: 'You need to input the nickname!'}});
+            return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('You need to input the nickname!')] });
         }
 
         const nick = args.slice(1).join(' ');
-        if (!nick) return message.channel.send({embed: {color: 'RED', description: 'You need to input the nickname!'}});
+        if (!nick) return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('You need to input the nickname!')] });
 
         let member = message.guild.members.cache.get(user.id);
         if (!member) {
             member = await message.guild.members.fetch(user.id).catch(() => null) || undefined;
         }
         if (!member) {
-            return message.channel.send({embed: {color: 'RED', description: 'Could not find that user in this server.'}});
+            return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('Could not find that user in this server.')] });
         }
         if (!member.manageable) {
-            return message.channel.send({embed: {color: 'RED', description: 'I cannot change that user\'s nickname.'}});
+            return message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription('I cannot change that user\'s nickname.')] });
         }
 
         return member
             .setNickname(nick)
-            .then(() => message.channel.send({embed: {color: 'GREEN', description: `Successfully changed **${user.tag}** nickname to **${nick}**`}}))
-            .catch(err => message.channel.send({embed: {color: 'RED', description: `Error: ${err}`}}));
+            .then(() => message.reply({ embeds: [new EmbedBuilder().setColor('Green').setDescription(`Successfully changed **${user.tag}** nickname to **${nick}**`)] }))
+            .catch(err => message.reply({ embeds: [new EmbedBuilder().setColor('Red').setDescription(`Error: ${err}`)] }));
     },
 };
 

@@ -2,15 +2,10 @@ import doitCommand = require('./doit');
 
 describe('doit command', () => {
     let mockMessage: any;
-    let mockChannel: any;
 
     beforeEach(() => {
-        mockChannel = {
-            send: jest.fn().mockResolvedValue({}),
-        };
-
         mockMessage = {
-            channel: mockChannel,
+            reply: jest.fn().mockResolvedValue({}),
         };
     });
 
@@ -27,16 +22,16 @@ describe('doit command', () => {
         expect(typeof doitCommand.description).toBe('string');
     });
 
-    test('should send the Burl Fret link when executed', async () => {
+    test('should reply with the Burl Fret link when executed', async () => {
         await doitCommand.execute(mockMessage);
 
-        expect(mockChannel.send).toHaveBeenCalledTimes(1);
-        expect(mockChannel.send).toHaveBeenCalledWith(
+        expect(mockMessage.reply).toHaveBeenCalledTimes(1);
+        expect(mockMessage.reply).toHaveBeenCalledWith(
             'Do it for Burl Fret https://cdn.discordapp.com/attachments/764971562205184002/767324313987579914/video0.mov'
         );
     });
 
-    test('should return the promise from channel.send', async () => {
+    test('should return the promise from message.reply', async () => {
         const result = doitCommand.execute(mockMessage);
         expect(result).toBeDefined();
         await result;

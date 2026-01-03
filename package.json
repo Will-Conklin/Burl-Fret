@@ -41,7 +41,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.4.1"
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.3",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
