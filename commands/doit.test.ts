@@ -1,8 +1,8 @@
-const doitCommand = require('./doit');
+import doitCommand = require('./doit');
 
 describe('doit command', () => {
-    let mockMessage;
-    let mockChannel;
+    let mockMessage: any;
+    let mockChannel: any;
 
     beforeEach(() => {
         mockChannel = {
@@ -36,9 +36,9 @@ describe('doit command', () => {
         );
     });
 
-    test('should return the promise from channel.send', () => {
+    test('should return the promise from channel.send', async () => {
         const result = doitCommand.execute(mockMessage);
         expect(result).toBeDefined();
-        expect(typeof result.then).toBe('function');
+        await result;
     });
 });

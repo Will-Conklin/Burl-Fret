@@ -1,13 +1,13 @@
-const setCommand = require('./set');
+import setCommand = require('./set');
 
 describe('set command', () => {
-    let mockMessage;
-    let mockChannel;
-    let mockGuild;
-    let mockMember;
-    let mockUser;
-    let mockGuildMe;
-    let mockTargetMember;
+    let mockMessage: any;
+    let mockChannel: any;
+    let mockGuild: any;
+    let mockMember: any;
+    let mockUser: any;
+    let mockGuildMe: any;
+    let mockTargetMember: any;
 
     beforeEach(() => {
         mockChannel = {
@@ -81,7 +81,7 @@ describe('set command', () => {
     });
 
     test('should reject if user lacks MANAGE_NICKNAMES permission', async () => {
-        mockMember.hasPermission.mockReturnValue(false);
+        (mockMember!.hasPermission as jest.Mock).mockReturnValue(false);
 
         await setCommand.execute(mockMessage, []);
 
@@ -94,7 +94,7 @@ describe('set command', () => {
     });
 
     test('should reject if bot lacks MANAGE_NICKNAMES permission', async () => {
-        mockGuildMe.hasPermission.mockReturnValue(false);
+        (mockGuildMe!.hasPermission as jest.Mock).mockReturnValue(false);
 
         await setCommand.execute(mockMessage, []);
 
@@ -107,7 +107,7 @@ describe('set command', () => {
     });
 
     test('should reject if no user is mentioned', async () => {
-        mockMessage.mentions.users.first.mockReturnValue(null);
+        (mockMessage.mentions!.users.first as jest.Mock).mockReturnValue(null);
 
         await setCommand.execute(mockMessage, []);
 
@@ -131,8 +131,8 @@ describe('set command', () => {
     });
 
     test('should reject if member is not in server', async () => {
-        mockGuild.members.cache.get.mockReturnValue(null);
-        mockGuild.members.fetch.mockRejectedValue(new Error('Not found'));
+        (mockGuild!.members!.cache.get as jest.Mock).mockReturnValue(null);
+        (mockGuild!.members!.fetch as jest.Mock).mockRejectedValue(new Error('Not found'));
 
         await setCommand.execute(mockMessage, ['@user', 'NewNick']);
 
@@ -145,7 +145,7 @@ describe('set command', () => {
     });
 
     test('should reject if member is not manageable', async () => {
-        mockTargetMember.manageable = false;
+        mockTargetMember!.manageable = false;
 
         await setCommand.execute(mockMessage, ['@user', 'NewNick']);
 
@@ -160,7 +160,7 @@ describe('set command', () => {
     test('should successfully set nickname with single word', async () => {
         await setCommand.execute(mockMessage, ['@user', 'NewNick']);
 
-        expect(mockTargetMember.setNickname).toHaveBeenCalledWith('NewNick');
+        expect(mockTargetMember!.setNickname).toHaveBeenCalledWith('NewNick');
         expect(mockChannel.send).toHaveBeenCalledWith({
             embed: {
                 color: 'GREEN',
@@ -172,7 +172,7 @@ describe('set command', () => {
     test('should successfully set nickname with multiple words', async () => {
         await setCommand.execute(mockMessage, ['@user', 'New', 'Nick', 'Name']);
 
-        expect(mockTargetMember.setNickname).toHaveBeenCalledWith('New Nick Name');
+        expect(mockTargetMember!.setNickname).toHaveBeenCalledWith('New Nick Name');
         expect(mockChannel.send).toHaveBeenCalledWith({
             embed: {
                 color: 'GREEN',
@@ -182,18 +182,18 @@ describe('set command', () => {
     });
 
     test('should fetch member if not in cache', async () => {
-        mockGuild.members.cache.get.mockReturnValue(null);
-        mockGuild.members.fetch.mockResolvedValue(mockTargetMember);
+        (mockGuild!.members!.cache.get as jest.Mock).mockReturnValue(null);
+        (mockGuild!.members!.fetch as jest.Mock).mockResolvedValue(mockTargetMember);
 
         await setCommand.execute(mockMessage, ['@user', 'NewNick']);
 
-        expect(mockGuild.members.fetch).toHaveBeenCalledWith('123456789');
-        expect(mockTargetMember.setNickname).toHaveBeenCalledWith('NewNick');
+        expect(mockGuild!.members!.fetch).toHaveBeenCalledWith('123456789');
+        expect(mockTargetMember!.setNickname).toHaveBeenCalledWith('NewNick');
     });
 
     test('should handle setNickname errors', async () => {
         const error = new Error('Permission denied');
-        mockTargetMember.setNickname.mockRejectedValue(error);
+        (mockTargetMember!.setNickname as jest.Mock).mockRejectedValue(error);
 
         await setCommand.execute(mockMessage, ['@user', 'NewNick']);
 

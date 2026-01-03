@@ -1,29 +1,32 @@
-const fs = require('fs');
-const Discord = require('discord.js');
+import * as fs from 'fs';
+import { Client, Collection, Message } from 'discord.js';
+import { Command } from './types/command';
+import { Config } from './types/config';
 
-let config;
+let config: Config;
 try {
     config = require('./config.json');
-} catch (err) {
+} catch {
     console.error('Missing config.json. Copy config.example.json to config.json and fill in your bot token.');
     process.exit(1);
 }
 
 const { prefix, token } = config;
 
-const client = new Discord.Client({
+const client = new Client({
     ws: {
         intents: ['GUILDS', 'GUILD_MESSAGES'],
     },
-});
-client.commands = new Discord.Collection();
+}) as Client & { commands: Collection<string, Command> };
+
+client.commands = new Collection<string, Command>();
 
 const commandsPath = './commands';
 if (fs.existsSync(commandsPath)) {
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
 
     for (const file of commandFiles) {
-        const command = require(`./commands/${file}`);
+        const command: Command = require(`./commands/${file}`);
         client.commands.set(command.name, command);
     }
 } else {
@@ -33,12 +36,15 @@ if (fs.existsSync(commandsPath)) {
 client.once('ready', () => {
     console.log('Ready!');
 });
-client.on('message', async message => {
+
+client.on('message', async (message: Message) => {
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
 
     const args = message.content.slice(prefix.length).trim().split(/\s+/);
-    const commandName = args.shift().toLowerCase();
+    const commandName = args.shift()?.toLowerCase();
+    if (!commandName) return;
+
     const command = client.commands.get(commandName);
     if (!command) return;
 
@@ -49,4 +55,5 @@ client.on('message', async message => {
         message.channel.send({embed: {color: 'RED', description: 'Something went wrong while running that command.'}});
     }
 });
+
 client.login(token);
