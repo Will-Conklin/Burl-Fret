@@ -12,7 +12,7 @@
 Transform the Burl-Fret repository from a single Discord bot into a dual-bot deployment on fly.io. Both bots will have identical functionality deployed to the same Discord server, using different command prefixes to avoid conflicts.
 
 ### Key Objectives
-- Deploy two identical Discord bots to fly.io
+- Deploy two identical Discord bots to fly.io: **Bumbles** and **DiscoCowboy**
 - Both bots accessible on the same Discord server
 - Shared codebase with no command duplication
 - Modern discord.js v14 implementation
@@ -54,7 +54,7 @@ Transform the Burl-Fret repository from a single Discord bot into a dual-bot dep
 │         Fly.io Application              │
 │                                         │
 │  ┌───────────────┐  ┌───────────────┐  │
-│  │   Bot 1       │  │   Bot 2       │  │
+│  │   Bumbles     │  │ DiscoCowboy   │  │
 │  │   Prefix: !   │  │   Prefix: ?   │  │
 │  │   Token: T1   │  │   Token: T2   │  │
 │  └───────┬───────┘  └───────┬───────┘  │
@@ -89,8 +89,8 @@ Transform the Burl-Fret repository from a single Discord bot into a dual-bot dep
 ### Component Breakdown
 
 #### 1. Bot Instances
-- **Bot 1**: Discord bot with `!` prefix, Token 1
-- **Bot 2**: Discord bot with `?` prefix, Token 2
+- **Bumbles**: Discord bot with `!` prefix, Token 1
+- **DiscoCowboy**: Discord bot with `?` prefix, Token 2
 - Both load same commands from shared directory
 - Both use same shared utilities
 
@@ -187,12 +187,12 @@ Burl-Fret/
 │
 ├── src/
 │   ├── bots/
-│   │   ├── bot1/
-│   │   │   ├── index.js                        # Bot 1 entry point
-│   │   │   └── config.js                       # Bot 1 configuration
-│   │   └── bot2/
-│   │       ├── index.js                        # Bot 2 entry point
-│   │       └── config.js                       # Bot 2 configuration
+│   │   ├── bumbles/
+│   │   │   ├── index.js                        # Bumbles entry point
+│   │   │   └── config.js                       # Bumbles configuration
+│   │   └── discocowboy/
+│   │       ├── index.js                        # DiscoCowboy entry point
+│   │       └── config.js                       # DiscoCowboy configuration
 │   │
 │   ├── commands/                               # SHARED by both bots
 │   │   ├── utility/
@@ -213,13 +213,13 @@ Burl-Fret/
 │           └── healthCheck.js                 # HTTP health endpoint
 │
 ├── scripts/
-│   ├── start-bot1.js                          # Bot 1 startup wrapper
-│   ├── start-bot2.js                          # Bot 2 startup wrapper
+│   ├── start-bumbles.js                       # Bumbles startup wrapper
+│   ├── start-discocowboy.js                   # DiscoCowboy startup wrapper
 │   └── deploy.sh                              # Deployment helper
 │
 ├── config/
-│   ├── bot1.config.js                         # Bot 1 environment config
-│   └── bot2.config.js                         # Bot 2 environment config
+│   ├── bumbles.config.js                      # Bumbles environment config
+│   └── discocowboy.config.js                  # DiscoCowboy environment config
 │
 ├── .env.example                               # Environment template
 ├── .gitignore                                 # Git ignore rules
@@ -239,7 +239,7 @@ Burl-Fret/
 - Write once, deploy to both bots
 - Organized by category (utility, fun, admin, etc.)
 
-**Separate Bot Entry Points** (`src/bots/bot1/`, `src/bots/bot2/`)
+**Separate Bot Entry Points** (`src/bots/bumbles/`, `src/bots/discocowboy/`)
 - Different configurations (token, prefix)
 - Same initialization logic
 - Independent process management
@@ -258,15 +258,15 @@ Burl-Fret/
 
 **Required Secrets** (via `fly secrets set`):
 ```bash
-# Bot 1 Configuration
-BOT1_TOKEN=your_discord_bot_token_1
-BOT1_CLIENT_ID=your_discord_client_id_1
-BOT1_PREFIX=!
+# Bumbles Configuration
+BUMBLES_TOKEN=your_discord_bot_token_bumbles
+BUMBLES_CLIENT_ID=your_discord_client_id_bumbles
+BUMBLES_PREFIX=!
 
-# Bot 2 Configuration
-BOT2_TOKEN=your_discord_bot_token_2
-BOT2_CLIENT_ID=your_discord_client_id_2
-BOT2_PREFIX=?
+# DiscoCowboy Configuration
+DISCOCOWBOY_TOKEN=your_discord_bot_token_discocowboy
+DISCOCOWBOY_CLIENT_ID=your_discord_client_id_discocowboy
+DISCOCOWBOY_PREFIX=?
 
 # Shared Configuration
 NODE_ENV=production
@@ -280,35 +280,35 @@ HEALTH_CHECK_PORT=3000
 cp .env.example .env
 
 # Edit .env with your tokens
-BOT1_TOKEN=your_development_token_1
-BOT2_TOKEN=your_development_token_2
-BOT1_PREFIX=!
-BOT2_PREFIX=?
+BUMBLES_TOKEN=your_development_token_bumbles
+DISCOCOWBOY_TOKEN=your_development_token_discocowboy
+BUMBLES_PREFIX=!
+DISCOCOWBOY_PREFIX=?
 NODE_ENV=development
 LOG_LEVEL=debug
 ```
 
 ### Configuration Files
 
-**`config/bot1.config.js`**
+**`config/bumbles.config.js`**
 ```javascript
 module.exports = {
-  token: process.env.BOT1_TOKEN,
-  clientId: process.env.BOT1_CLIENT_ID,
-  prefix: process.env.BOT1_PREFIX || '!',
-  name: 'Burl-Fret Bot 1',
+  token: process.env.BUMBLES_TOKEN,
+  clientId: process.env.BUMBLES_CLIENT_ID,
+  prefix: process.env.BUMBLES_PREFIX || '!',
+  name: 'Bumbles',
   color: '#5865F2', // Discord blue
   commandsPath: './src/commands'
 };
 ```
 
-**`config/bot2.config.js`**
+**`config/discocowboy.config.js`**
 ```javascript
 module.exports = {
-  token: process.env.BOT2_TOKEN,
-  clientId: process.env.BOT2_CLIENT_ID,
-  prefix: process.env.BOT2_PREFIX || '?',
-  name: 'Burl-Fret Bot 2',
+  token: process.env.DISCOCOWBOY_TOKEN,
+  clientId: process.env.DISCOCOWBOY_CLIENT_ID,
+  prefix: process.env.DISCOCOWBOY_PREFIX || '?',
+  name: 'DiscoCowboy',
   color: '#57F287', // Discord green
   commandsPath: './src/commands'
 };
@@ -370,8 +370,8 @@ primary_region = "iad"
     path = "/health"
 
 [processes]
-  bot1 = "node scripts/start-bot1.js"
-  bot2 = "node scripts/start-bot2.js"
+  bumbles = "node scripts/start-bumbles.js"
+  discocowboy = "node scripts/start-discocowboy.js"
   web = "node src/shared/services/healthCheck.js"
 
 [[vm]]
@@ -424,8 +424,8 @@ CMD ["node", "src/shared/services/healthCheck.js"]
 ### Resource Allocation
 
 **Initial Configuration (512MB RAM):**
-- Bot 1 Process: ~180MB
-- Bot 2 Process: ~180MB
+- Bumbles Process: ~180MB
+- DiscoCowboy Process: ~180MB
 - Health Check Server: ~50MB
 - System Overhead: ~102MB
 
@@ -607,18 +607,18 @@ const express = require('express');
 const app = express();
 const port = process.env.HEALTH_CHECK_PORT || 3000;
 
-let bot1Status = { status: 'starting', uptime: 0 };
-let bot2Status = { status: 'starting', uptime: 0 };
+let bumblesStatus = { status: 'starting', uptime: 0 };
+let discocowboyStatus = { status: 'starting', uptime: 0 };
 
 app.get('/health', (req, res) => {
-  const healthy = bot1Status.status === 'running' || bot2Status.status === 'running';
+  const healthy = bumblesStatus.status === 'running' || discocowboyStatus.status === 'running';
 
   res.status(healthy ? 200 : 503).json({
     status: healthy ? 'healthy' : 'unhealthy',
     timestamp: new Date().toISOString(),
     bots: {
-      bot1: bot1Status,
-      bot2: bot2Status
+      bumbles: bumblesStatus,
+      discocowboy: discocowboyStatus
     }
   });
 });
@@ -724,7 +724,7 @@ npm install
 
 **1.4 Create directory structure**
 ```bash
-mkdir -p src/{bots/{bot1,bot2},commands/{utility,fun},shared/{utils,middleware,services}}
+mkdir -p src/{bots/{bumbles,discocowboy},commands/{utility,fun},shared/{utils,middleware,services}}
 mkdir -p config scripts docs/sdlc/plans
 ```
 
@@ -762,24 +762,24 @@ node -e "console.log(require('./src/commands/utility/set'))"
 ### Phase 4: Bot Implementation (Day 2-3)
 
 **4.1 Create bot configurations**
-- [ ] `config/bot1.config.js` - Bot 1 config
-- [ ] `config/bot2.config.js` - Bot 2 config
+- [ ] `config/bumbles.config.js` - Bumbles config
+- [ ] `config/discocowboy.config.js` - DiscoCowboy config
 
 **4.2 Create bot entry points**
-- [ ] `src/bots/bot1/index.js` - Bot 1 main file (discord.js v14)
-- [ ] `src/bots/bot2/index.js` - Bot 2 main file (discord.js v14)
+- [ ] `src/bots/bumbles/index.js` - Bumbles main file (discord.js v14)
+- [ ] `src/bots/discocowboy/index.js` - DiscoCowboy main file (discord.js v14)
 
 **4.3 Create startup scripts**
-- [ ] `scripts/start-bot1.js` - Bot 1 process wrapper
-- [ ] `scripts/start-bot2.js` - Bot 2 process wrapper
+- [ ] `scripts/start-bumbles.js` - Bumbles process wrapper
+- [ ] `scripts/start-discocowboy.js` - DiscoCowboy process wrapper
 
 **4.4 Test bots locally**
 ```bash
 # Terminal 1
-npm run dev:bot1
+npm run dev:bumbles
 
 # Terminal 2
-npm run dev:bot2
+npm run dev:discocowboy
 ```
 
 ### Phase 5: Containerization (Day 3)
@@ -814,7 +814,7 @@ fly launch --no-deploy --name burl-fret-bots --region iad
 
 **6.3 Set secrets**
 ```bash
-fly secrets set BOT1_TOKEN="..." BOT2_TOKEN="..." BOT1_PREFIX="!" BOT2_PREFIX="?"
+fly secrets set BUMBLES_TOKEN="..." DISCOCOWBOY_TOKEN="..." BUMBLES_PREFIX="!" DISCOCOWBOY_PREFIX="?"
 ```
 
 **6.4 Deploy to fly.io**
@@ -834,10 +834,10 @@ curl https://burl-fret-bots.fly.dev/health
 
 **7.1 Discord functionality tests**
 - [ ] Both bots appear online in Discord
-- [ ] `!set @user nickname` works (Bot 1)
-- [ ] `?set @user nickname` works (Bot 2)
-- [ ] `!doit` works (Bot 1)
-- [ ] `?doit` works (Bot 2)
+- [ ] `!set @user nickname` works (Bumbles)
+- [ ] `?set @user nickname` works (DiscoCowboy)
+- [ ] `!doit` works (Bumbles)
+- [ ] `?doit` works (DiscoCowboy)
 - [ ] `!ping` / `?ping` respond with latency
 - [ ] `!help` / `?help` show command list
 
@@ -890,11 +890,11 @@ Before deployment, create two Discord bot applications:
 
 **Step 1: Create Bot Applications**
 1. Visit https://discord.com/developers/applications
-2. Click "New Application" → Name: "Burl-Fret Bot 1"
+2. Click "New Application" → Name: "Bumbles"
 3. Navigate to "Bot" tab → Click "Add Bot"
-4. Copy the bot token → Save as `BOT1_TOKEN`
-5. Copy the Application ID → Save as `BOT1_CLIENT_ID`
-6. Repeat for "Burl-Fret Bot 2"
+4. Copy the bot token → Save as `BUMBLES_TOKEN`
+5. Copy the Application ID → Save as `BUMBLES_CLIENT_ID`
+6. Repeat for "DiscoCowboy"
 
 **Step 2: Enable Privileged Intents**
 For BOTH bots:
@@ -1131,11 +1131,11 @@ npm install
 
 **Run tests:**
 ```bash
-# Test Bot 1
-npm run dev:bot1
+# Test Bumbles
+npm run dev:bumbles
 
-# Test Bot 2 (in new terminal)
-npm run dev:bot2
+# Test DiscoCowboy (in new terminal)
+npm run dev:discocowboy
 
 # Test health check (in new terminal)
 curl http://localhost:3000/health
@@ -1385,10 +1385,10 @@ fly ssh console -C "env | grep BOT"
 - [x] `package.json`
 
 **Source Files:**
-- [x] `src/bots/bot1/index.js`
-- [x] `src/bots/bot2/index.js`
-- [x] `src/bots/bot1/config.js`
-- [x] `src/bots/bot2/config.js`
+- [x] `src/bots/bumbles/index.js`
+- [x] `src/bots/discocowboy/index.js`
+- [x] `src/bots/bumbles/config.js`
+- [x] `src/bots/discocowboy/config.js`
 - [x] `src/commands/utility/set.js`
 - [x] `src/commands/fun/doit.js`
 - [x] `src/commands/utility/ping.js`
@@ -1400,8 +1400,8 @@ fly ssh console -C "env | grep BOT"
 - [x] `src/shared/services/healthCheck.js`
 
 **Scripts:**
-- [x] `scripts/start-bot1.js`
-- [x] `scripts/start-bot2.js`
+- [x] `scripts/start-bumbles.js`
+- [x] `scripts/start-discocowboy.js`
 - [x] `scripts/deploy.sh`
 
 **Documentation:**
