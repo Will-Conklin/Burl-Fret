@@ -1,0 +1,61 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies (will be installed in container)
+node_modules/
+npm-debug.log*
+
+# Build artifacts
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Tests
+tests/
+test/
+*.test.js
+*.spec.js
+coverage/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Fly.io
+.fly/
+fly.toml
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml

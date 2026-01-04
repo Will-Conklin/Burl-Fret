@@ -1,16 +1,31 @@
 {
-  "name": "Bumbles2",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "burl-fret-bots",
+  "version": "2.0.0",
+  "description": "Dual Discord bot deployment: Bumbles and DiscoCowboy",
+  "main": "src/shared/services/healthCheck.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/shared/services/healthCheck.js",
+    "start:bumbles": "node scripts/start-bumbles.js",
+    "start:discocowboy": "node scripts/start-discocowboy.js",
+    "dev:bumbles": "NODE_ENV=development node scripts/start-bumbles.js",
+    "dev:discocowboy": "NODE_ENV=development node scripts/start-discocowboy.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src/**/*.js"
   },
-  "keywords": [],
+  "keywords": ["discord", "bot", "discord.js", "bumbles", "discocowboy"],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.4.1",
-    "eslint": "^7.12.1"
+    "discord.js": "^14.14.1",
+    "express": "^4.18.2",
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
