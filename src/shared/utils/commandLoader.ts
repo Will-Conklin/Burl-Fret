@@ -1,22 +1,41 @@
-const fs = require('fs');
-const path = require('path');
-const { Collection } = require('discord.js');
+import fs from 'fs';
+import path from 'path';
+import { Collection, Message } from 'discord.js';
+import winston from 'winston';
+
+export interface BotCommand {
+  name: string;
+  description: string;
+  category?: string;
+  aliases?: string[];
+  permissions?: string[];
+  cooldown?: number;
+  execute: (message: Message, args: string[]) => Promise<void> | void;
+}
+
+interface CommandStats {
+  total: number;
+  categories: Record<string, number>;
+  aliases: number;
+}
 
 /**
  * Command loader utility
  */
-class CommandLoader {
-  constructor(logger) {
+export class CommandLoader {
+  private logger: winston.Logger;
+
+  constructor(logger: winston.Logger) {
     this.logger = logger;
   }
 
   /**
    * Load all commands from the commands directory
-   * @param {string} commandsPath - Path to commands directory
-   * @returns {Collection} Collection of commands
+   * @param commandsPath - Path to commands directory
+   * @returns Collection of commands
    */
-  loadCommands(commandsPath = path.join(process.cwd(), 'src', 'commands')) {
-    const commands = new Collection();
+  loadCommands(commandsPath: string = path.join(process.cwd(), 'src', 'commands')): Collection<string, BotCommand> {
+    const commands = new Collection<string, BotCommand>();
     let loadedCount = 0;
     let errorCount = 0;
 
@@ -40,14 +59,15 @@ class CommandLoader {
       for (const category of categories) {
         const categoryPath = path.join(commandsPath, category);
         const commandFiles = fs.readdirSync(categoryPath)
-          .filter(file => file.endsWith('.js'));
+          .filter(file => file.endsWith('.js') || file.endsWith('.ts'));
 
         this.logger.info(`Loading ${commandFiles.length} commands from ${category} category`);
 
         for (const file of commandFiles) {
           try {
             const filePath = path.join(categoryPath, file);
-            const command = require(filePath);
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const command: BotCommand = require(filePath);
 
             // Validate command structure
             if (!this.validateCommand(command, file)) {
@@ -74,8 +94,8 @@ class CommandLoader {
           } catch (error) {
             errorCount++;
             this.logger.error(`Failed to load command ${file}:`, {
-              message: error.message,
-              stack: error.stack
+              message: (error as Error).message,
+              stack: (error as Error).stack
             });
           }
         }
@@ -84,8 +104,8 @@ class CommandLoader {
       this.logger.info(`Command loading complete: ${loadedCount} commands loaded, ${errorCount} errors`);
     } catch (error) {
       this.logger.error('Error loading commands:', {
-        message: error.message,
-        stack: error.stack
+        message: (error as Error).message,
+        stack: (error as Error).stack
       });
     }
 
@@ -94,11 +114,11 @@ class CommandLoader {
 
   /**
    * Validate command structure
-   * @param {Object} command - Command object to validate
-   * @param {string} fileName - Name of the command file
-   * @returns {boolean} True if valid, false otherwise
+   * @param command - Command object to validate
+   * @param fileName - Name of the command file
+   * @returns True if valid, false otherwise
    */
-  validateCommand(command, fileName) {
+  private validateCommand(command: BotCommand, fileName: string): boolean {
     // Check if command has required properties
     if (!command.name) {
       this.logger.error(`Command ${fileName} is missing 'name' property`);
@@ -133,12 +153,16 @@ class CommandLoader {
 
   /**
    * Reload a specific command
-   * @param {Collection} commands - Commands collection
-   * @param {string} commandName - Name of command to reload
-   * @param {string} commandsPath - Path to commands directory
-   * @returns {boolean} True if successful, false otherwise
+   * @param commands - Commands collection
+   * @param commandName - Name of command to reload
+   * @param commandsPath - Path to commands directory
+   * @returns True if successful, false otherwise
    */
-  reloadCommand(commands, commandName, commandsPath = path.join(process.cwd(), 'src', 'commands')) {
+  reloadCommand(
+    commands: Collection<string, BotCommand>,
+    commandName: string,
+    commandsPath: string = path.join(process.cwd(), 'src', 'commands')
+  ): boolean {
     try {
       // Find the command in the collection
       const command = commands.get(commandName);
@@ -155,18 +179,20 @@ class CommandLoader {
       for (const category of categories) {
         const categoryPath = path.join(commandsPath, category);
         const commandFiles = fs.readdirSync(categoryPath)
-          .filter(file => file.endsWith('.js'));
+          .filter(file => file.endsWith('.js') || file.endsWith('.ts'));
 
         for (const file of commandFiles) {
           const filePath = path.join(categoryPath, file);
-          const testCommand = require(filePath);
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const testCommand: BotCommand = require(filePath);
 
           if (testCommand.name === commandName) {
             // Delete from require cache
             delete require.cache[require.resolve(filePath)];
 
             // Reload the command
-            const newCommand = require(filePath);
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const newCommand: BotCommand = require(filePath);
             newCommand.category = category.charAt(0).toUpperCase() + category.slice(1);
 
             // Update collection
@@ -182,8 +208,8 @@ class CommandLoader {
       return false;
     } catch (error) {
       this.logger.error(`Failed to reload command ${commandName}:`, {
-        message: error.message,
-        stack: error.stack
+        message: (error as Error).message,
+        stack: (error as Error).stack
       });
       return false;
     }
@@ -191,17 +217,17 @@ class CommandLoader {
 
   /**
    * Get command statistics
-   * @param {Collection} commands - Commands collection
-   * @returns {Object} Statistics object
+   * @param commands - Commands collection
+   * @returns Statistics object
    */
-  getStats(commands) {
-    const stats = {
+  getStats(commands: Collection<string, BotCommand>): CommandStats {
+    const stats: CommandStats = {
       total: 0,
       categories: {},
       aliases: 0
     };
 
-    const uniqueCommands = new Set();
+    const uniqueCommands = new Set<string>();
 
     commands.forEach((command, key) => {
       // Count unique commands only
@@ -221,5 +247,3 @@ class CommandLoader {
     return stats;
   }
 }
-
-module.exports = CommandLoader;

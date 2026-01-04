@@ -1,19 +1,30 @@
-const { EmbedBuilder } = require('discord.js');
+import { EmbedBuilder, Message, DiscordAPIError } from 'discord.js';
+import winston from 'winston';
+
+interface RateLimitInfo {
+  timeout: number;
+  limit: number;
+  method: string;
+  path: string;
+  route: string;
+}
 
 /**
  * Error handler utility for Discord bots
  */
-class ErrorHandler {
-  constructor(logger) {
+export class ErrorHandler {
+  private logger: winston.Logger;
+
+  constructor(logger: winston.Logger) {
     this.logger = logger;
   }
 
   /**
    * Handle general errors
-   * @param {Error} error - The error to handle
-   * @param {string} context - Context where error occurred
+   * @param error - The error to handle
+   * @param context - Context where error occurred
    */
-  handleError(error, context = 'Unknown') {
+  handleError(error: Error, context: string = 'Unknown'): void {
     this.logger.error(`Error in ${context}:`, {
       message: error.message,
       stack: error.stack,
@@ -23,11 +34,11 @@ class ErrorHandler {
 
   /**
    * Handle command errors and optionally reply to user
-   * @param {Error} error - The error to handle
-   * @param {Message} message - Discord message object
-   * @param {string} commandName - Name of the command
+   * @param error - The error to handle
+   * @param message - Discord message object
+   * @param commandName - Name of the command
    */
-  async handleCommandError(error, message, commandName) {
+  async handleCommandError(error: Error, message: Message, commandName: string): Promise<void> {
     this.logger.error(`Error executing command ${commandName}:`, {
       message: error.message,
       stack: error.stack,
@@ -50,23 +61,23 @@ class ErrorHandler {
       await message.reply({ embeds: [errorEmbed] });
     } catch (replyError) {
       this.logger.error('Failed to send error message to user:', {
-        message: replyError.message
+        message: (replyError as Error).message
       });
     }
   }
 
   /**
    * Handle Discord API errors
-   * @param {Error} error - Discord API error
-   * @param {string} context - Context where error occurred
+   * @param error - Discord API error
+   * @param context - Context where error occurred
    */
-  handleDiscordAPIError(error, context = 'Discord API') {
+  handleDiscordAPIError(error: DiscordAPIError, context: string = 'Discord API'): void {
     const errorInfo = {
       message: error.message,
       code: error.code,
       method: error.method,
-      path: error.path,
-      httpStatus: error.httpStatus
+      url: error.url,
+      httpStatus: error.status
     };
 
     this.logger.error(`Discord API error in ${context}:`, errorInfo);
@@ -92,9 +103,9 @@ class ErrorHandler {
 
   /**
    * Handle rate limit errors
-   * @param {Object} rateLimitInfo - Rate limit information
+   * @param rateLimitInfo - Rate limit information
    */
-  handleRateLimit(rateLimitInfo) {
+  handleRateLimit(rateLimitInfo: RateLimitInfo): void {
     this.logger.warn('Rate limit hit:', {
       timeout: rateLimitInfo.timeout,
       limit: rateLimitInfo.limit,
@@ -106,11 +117,11 @@ class ErrorHandler {
 
   /**
    * Create error embed for user-facing errors
-   * @param {string} title - Error title
-   * @param {string} description - Error description
-   * @returns {EmbedBuilder} Error embed
+   * @param title - Error title
+   * @param description - Error description
+   * @returns Error embed
    */
-  createErrorEmbed(title, description) {
+  createErrorEmbed(title: string, description: string): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(0xFF0000)
       .setTitle(`❌ ${title}`)
@@ -120,9 +131,9 @@ class ErrorHandler {
 
   /**
    * Handle process-level errors
-   * @param {Error} error - Process error
+   * @param error - Process error
    */
-  handleProcessError(error) {
+  handleProcessError(error: Error): void {
     this.logger.error('Uncaught process error:', {
       message: error.message,
       stack: error.stack,
@@ -132,15 +143,13 @@ class ErrorHandler {
 
   /**
    * Handle unhandled promise rejections
-   * @param {*} reason - Rejection reason
-   * @param {Promise} promise - Rejected promise
+   * @param reason - Rejection reason
+   * @param promise - Rejected promise
    */
-  handleUnhandledRejection(reason, promise) {
+  handleUnhandledRejection(reason: unknown, promise: Promise<unknown>): void {
     this.logger.error('Unhandled promise rejection:', {
       reason: reason,
       promise: promise
     });
   }
 }
-
-module.exports = ErrorHandler;

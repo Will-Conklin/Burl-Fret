@@ -1,12 +1,12 @@
-const winston = require('winston');
-const path = require('path');
+import winston from 'winston';
+import path from 'path';
 
 /**
  * Creates a logger instance for a bot
- * @param {string} botName - Name of the bot (bumbles or discocowboy)
- * @returns {winston.Logger} Configured logger instance
+ * @param botName - Name of the bot (bumbles or discocowboy)
+ * @returns Configured logger instance
  */
-function createLogger(botName = 'shared') {
+export function createLogger(botName: string = 'shared'): winston.Logger {
   const logDir = path.join(process.cwd(), 'logs');
 
   // Define log format
@@ -72,5 +72,3 @@ function createLogger(botName = 'shared') {
 
   return logger;
 }
-
-module.exports = { createLogger };

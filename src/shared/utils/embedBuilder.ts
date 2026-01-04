@@ -1,17 +1,31 @@
-const { EmbedBuilder } = require('discord.js');
+import { EmbedBuilder, Client, EmbedAuthorOptions, EmbedFooterOptions, APIEmbedField } from 'discord.js';
+
+interface EmbedOptions {
+  fields?: APIEmbedField[];
+  footer?: EmbedFooterOptions;
+  thumbnail?: string;
+  image?: string;
+  author?: EmbedAuthorOptions;
+}
+
+interface Command {
+  name: string;
+  description: string;
+  category?: string;
+}
 
 /**
  * Utility class for building consistent Discord embeds
  */
-class EmbedHelper {
+export class EmbedHelper {
   /**
    * Create a success embed
-   * @param {string} title - Embed title
-   * @param {string} description - Embed description
-   * @param {Object} options - Additional embed options
-   * @returns {EmbedBuilder} Success embed
+   * @param title - Embed title
+   * @param description - Embed description
+   * @param options - Additional embed options
+   * @returns Success embed
    */
-  static success(title, description, options = {}) {
+  static success(title: string, description: string, options: EmbedOptions = {}): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setColor(0x00FF00)
       .setTitle(`✅ ${title}`)
@@ -39,12 +53,12 @@ class EmbedHelper {
 
   /**
    * Create an error embed
-   * @param {string} title - Embed title
-   * @param {string} description - Embed description
-   * @param {Object} options - Additional embed options
-   * @returns {EmbedBuilder} Error embed
+   * @param title - Embed title
+   * @param description - Embed description
+   * @param options - Additional embed options
+   * @returns Error embed
    */
-  static error(title, description, options = {}) {
+  static error(title: string, description: string, options: EmbedOptions = {}): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setColor(0xFF0000)
       .setTitle(`❌ ${title}`)
@@ -64,12 +78,12 @@ class EmbedHelper {
 
   /**
    * Create an info embed
-   * @param {string} title - Embed title
-   * @param {string} description - Embed description
-   * @param {Object} options - Additional embed options
-   * @returns {EmbedBuilder} Info embed
+   * @param title - Embed title
+   * @param description - Embed description
+   * @param options - Additional embed options
+   * @returns Info embed
    */
-  static info(title, description, options = {}) {
+  static info(title: string, description: string, options: EmbedOptions = {}): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setColor(0x0099FF)
       .setTitle(`ℹ️ ${title}`)
@@ -97,12 +111,12 @@ class EmbedHelper {
 
   /**
    * Create a warning embed
-   * @param {string} title - Embed title
-   * @param {string} description - Embed description
-   * @param {Object} options - Additional embed options
-   * @returns {EmbedBuilder} Warning embed
+   * @param title - Embed title
+   * @param description - Embed description
+   * @param options - Additional embed options
+   * @returns Warning embed
    */
-  static warning(title, description, options = {}) {
+  static warning(title: string, description: string, options: EmbedOptions = {}): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setColor(0xFFFF00)
       .setTitle(`⚠️ ${title}`)
@@ -122,13 +136,13 @@ class EmbedHelper {
 
   /**
    * Create a custom embed with specified color
-   * @param {string} title - Embed title
-   * @param {string} description - Embed description
-   * @param {number} color - Hex color code
-   * @param {Object} options - Additional embed options
-   * @returns {EmbedBuilder} Custom embed
+   * @param title - Embed title
+   * @param description - Embed description
+   * @param color - Hex color code
+   * @param options - Additional embed options
+   * @returns Custom embed
    */
-  static custom(title, description, color, options = {}) {
+  static custom(title: string, description: string, color: number, options: EmbedOptions = {}): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setColor(color)
       .setTitle(title)
@@ -160,11 +174,11 @@ class EmbedHelper {
 
   /**
    * Create a help command embed
-   * @param {Array} commands - Array of command objects
-   * @param {string} prefix - Bot command prefix
-   * @returns {EmbedBuilder} Help embed
+   * @param commands - Array of command objects
+   * @param prefix - Bot command prefix
+   * @returns Help embed
    */
-  static help(commands, prefix) {
+  static help(commands: Command[], prefix: string): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setColor(0x0099FF)
       .setTitle('📚 Command List')
@@ -172,7 +186,7 @@ class EmbedHelper {
       .setTimestamp();
 
     // Group commands by category
-    const categories = {};
+    const categories: Record<string, Command[]> = {};
     commands.forEach(cmd => {
       const category = cmd.category || 'General';
       if (!categories[category]) {
@@ -199,11 +213,11 @@ class EmbedHelper {
 
   /**
    * Create a bot status embed
-   * @param {Client} client - Discord client
-   * @param {string} botName - Name of the bot
-   * @returns {EmbedBuilder} Status embed
+   * @param client - Discord client
+   * @param botName - Name of the bot
+   * @returns Status embed
    */
-  static status(client, botName) {
+  static status(client: Client, botName: string): EmbedBuilder {
     const uptime = process.uptime();
     const hours = Math.floor(uptime / 3600);
     const minutes = Math.floor((uptime % 3600) / 60);
@@ -217,11 +231,8 @@ class EmbedHelper {
         { name: 'Users', value: `${client.users.cache.size}`, inline: true },
         { name: 'Uptime', value: `${hours}h ${minutes}m ${seconds}s`, inline: true },
         { name: 'Ping', value: `${client.ws.ping}ms`, inline: true },
-        { name: 'Node.js', value: process.version, inline: true },
-        { name: 'Discord.js', value: require('discord.js').version, inline: true }
+        { name: 'Node.js', value: process.version, inline: true }
       )
       .setTimestamp();
   }
 }
-
-module.exports = EmbedHelper;
