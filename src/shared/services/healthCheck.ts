@@ -1,7 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { Client } from 'discord.js';
 import { createLogger } from '../utils/logger';
-import winston from 'winston';
+import type { Logger } from 'winston';
 import { Server } from 'http';
 
 interface BotStatus {
@@ -23,7 +23,7 @@ interface BotStatusResponse {
 export class HealthCheckServer {
   private port: number;
   private app: Application;
-  private logger: winston.Logger;
+  private logger: Logger;
   private botStatuses: Map<string, BotStatus>;
   private server: Server | null;
   private startTime: number;

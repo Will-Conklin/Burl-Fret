@@ -11,7 +11,7 @@ import path from 'path';
 import bumblesConfig from '../../config/bumbles.config';
 import { createLogger } from '../../shared/utils/logger';
 import { ErrorHandler } from '../../shared/utils/errorHandler';
-import { CommandLoader, BotCommand } from '../../shared/utils/commandLoader';
+import { CommandLoader } from '../../shared/utils/commandLoader';
 
 // Load environment variables
 config();
@@ -43,8 +43,8 @@ process.on('SIGTERM', () => {
 // Extend the Client type to include commands
 declare module 'discord.js' {
   export interface Client {
-    commands: Collection<string, BotCommand>;
-    config: typeof bumblesConfig;
+    commands: Collection<string, any>;
+    config: any;
   }
 }
 
