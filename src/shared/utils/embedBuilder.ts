@@ -236,3 +236,39 @@ export class EmbedHelper {
       .setTimestamp();
   }
 }
+
+/**
+ * Create a simple success embed with just a description
+ * @param description - Success message
+ * @returns Success embed
+ */
+export function createSuccessEmbed(description: string): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(0x00FF00)
+    .setDescription(`✅ ${description}`)
+    .setTimestamp();
+}
+
+/**
+ * Create a simple error embed with just a description
+ * @param description - Error message
+ * @returns Error embed
+ */
+export function createErrorEmbed(description: string): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(0xFF0000)
+    .setDescription(`❌ ${description}`)
+    .setTimestamp();
+}
+
+/**
+ * Create a simple info embed with just a description
+ * @param description - Info message
+ * @returns Info embed
+ */
+export function createInfoEmbed(description: string): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(0x0099FF)
+    .setDescription(`ℹ️ ${description}`)
+    .setTimestamp();
+}
