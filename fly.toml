@@ -1,0 +1,77 @@
+# Fly.io configuration for Burl-Fret Discord Bots
+# Dual-bot deployment: Bumbles and DiscoCowboy
+
+app = "burl-fret-bots"
+primary_region = "iad"
+
+# Build configuration
+[build]
+  dockerfile = "Dockerfile"
+
+# Environment variables (non-sensitive)
+[env]
+  NODE_ENV = "production"
+  LOG_LEVEL = "info"
+  HEALTH_CHECK_PORT = "3000"
+
+# HTTP service configuration
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  # Health check configuration
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+# Services configuration
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+
+  # HTTP port
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  # HTTPS port
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  # TCP health checks
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "5s"
+
+  # HTTP health checks
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "2s"
+    grace_period = "10s"
+    method = "get"
+    path = "/health"
+
+# Multi-process configuration
+# NOTE: To run multiple processes, use: fly scale count 3
+# Then assign processes: fly machine update --process bumbles <machine-id>
+[processes]
+  web = "node dist/shared/services/healthCheck.js"
+  bumbles = "node dist/scripts/start-bumbles.js"
+  discocowboy = "node dist/scripts/start-discocowboy.js"
+
+# VM configuration
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
+
+# Metrics configuration (optional)
+[metrics]
+  port = 9091
+  path = "/metrics"
