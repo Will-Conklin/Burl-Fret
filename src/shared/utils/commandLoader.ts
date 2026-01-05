@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Collection, Message } from 'discord.js';
-import winston from 'winston';
+import type { Logger } from 'winston';
 
 export interface BotCommand {
   name: string;
@@ -23,9 +23,9 @@ interface CommandStats {
  * Command loader utility
  */
 export class CommandLoader {
-  private logger: winston.Logger;
+  private logger: Logger;
 
-  constructor(logger: winston.Logger) {
+  constructor(logger: Logger) {
     this.logger = logger;
   }
 
@@ -50,8 +50,8 @@ export class CommandLoader {
 
       // Read all category directories
       const categories = fs.readdirSync(commandsPath, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+        .filter((dirent: any) => dirent.isDirectory())
+        .map((dirent: any) => dirent.name);
 
       this.logger.info(`Found ${categories.length} command categories: ${categories.join(', ')}`);
 
@@ -59,7 +59,7 @@ export class CommandLoader {
       for (const category of categories) {
         const categoryPath = path.join(commandsPath, category);
         const commandFiles = fs.readdirSync(categoryPath)
-          .filter(file => file.endsWith('.js') || file.endsWith('.ts'));
+          .filter((file: any) => file.endsWith('.js') || file.endsWith('.ts'));
 
         this.logger.info(`Loading ${commandFiles.length} commands from ${category} category`);
 
@@ -173,13 +173,13 @@ export class CommandLoader {
 
       // Find the command file
       const categories = fs.readdirSync(commandsPath, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+        .filter((dirent: any) => dirent.isDirectory())
+        .map((dirent: any) => dirent.name);
 
       for (const category of categories) {
         const categoryPath = path.join(commandsPath, category);
         const commandFiles = fs.readdirSync(categoryPath)
-          .filter(file => file.endsWith('.js') || file.endsWith('.ts'));
+          .filter((file: any) => file.endsWith('.js') || file.endsWith('.ts'));
 
         for (const file of commandFiles) {
           const filePath = path.join(categoryPath, file);

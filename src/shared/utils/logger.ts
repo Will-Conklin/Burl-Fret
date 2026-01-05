@@ -1,4 +1,4 @@
-import winston from 'winston';
+import winston, { Logger } from 'winston';
 import path from 'path';
 
 /**
@@ -6,7 +6,7 @@ import path from 'path';
  * @param botName - Name of the bot (bumbles or discocowboy)
  * @returns Configured logger instance
  */
-export function createLogger(botName: string = 'shared'): winston.Logger {
+export function createLogger(botName: string = 'shared'): Logger {
   const logDir = path.join(process.cwd(), 'logs');
 
   // Define log format
@@ -14,7 +14,7 @@ export function createLogger(botName: string = 'shared'): winston.Logger {
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.errors({ stack: true }),
     winston.format.splat(),
-    winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
+    winston.format.printf(({ timestamp, level, message, stack, ...meta }: any) => {
       let log = `${timestamp} [${botName.toUpperCase()}] ${level.toUpperCase()}: ${message}`;
 
       // Add metadata if present

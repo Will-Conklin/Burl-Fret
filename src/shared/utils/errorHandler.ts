@@ -1,5 +1,5 @@
 import { EmbedBuilder, Message, DiscordAPIError } from 'discord.js';
-import winston from 'winston';
+import type { Logger } from 'winston';
 
 interface RateLimitInfo {
   timeout: number;
@@ -13,9 +13,9 @@ interface RateLimitInfo {
  * Error handler utility for Discord bots
  */
 export class ErrorHandler {
-  private logger: winston.Logger;
+  private logger: Logger;
 
-  constructor(logger: winston.Logger) {
+  constructor(logger: Logger) {
     this.logger = logger;
   }
 
