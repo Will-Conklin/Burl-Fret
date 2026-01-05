@@ -28,6 +28,7 @@ coverage/
 # Build outputs
 dist/
 build/
+*.tsbuildinfo
 
 # IDE and Editor files
 .vscode/

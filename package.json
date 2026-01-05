@@ -2,15 +2,20 @@
   "name": "burl-fret-bots",
   "version": "2.0.0",
   "description": "Dual Discord bot deployment: Bumbles and DiscoCowboy",
-  "main": "src/shared/services/healthCheck.js",
+  "main": "dist/shared/services/healthCheck.js",
   "scripts": {
-    "start": "node src/shared/services/healthCheck.js",
-    "start:bumbles": "node scripts/start-bumbles.js",
-    "start:discocowboy": "node scripts/start-discocowboy.js",
-    "dev:bumbles": "NODE_ENV=development node scripts/start-bumbles.js",
-    "dev:discocowboy": "NODE_ENV=development node scripts/start-discocowboy.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "start": "node dist/shared/services/healthCheck.js",
+    "start:bumbles": "node dist/scripts/start-bumbles.js",
+    "start:discocowboy": "node dist/scripts/start-discocowboy.js",
+    "dev": "npm run build && npm run start",
+    "dev:bumbles": "NODE_ENV=development npm run build && node dist/scripts/start-bumbles.js",
+    "dev:discocowboy": "NODE_ENV=development npm run build && node dist/scripts/start-discocowboy.js",
+    "dev:watch": "nodemon --watch src --ext ts --exec 'npm run build'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint src/**/*.js"
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": ["discord", "bot", "discord.js", "bumbles", "discocowboy"],
   "author": "",
@@ -22,8 +27,13 @@
     "dotenv": "^16.3.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.55.0",
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=18.0.0"
