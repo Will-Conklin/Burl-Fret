@@ -1,5 +1,9 @@
 # Burl-Fret Discord Bots
 
+[![Build](https://img.shields.io/github/actions/workflow/status/Burl-Fret/Burl-Fret/ci.yml?branch=main&label=build)](https://github.com/Burl-Fret/Burl-Fret/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-not%20configured-lightgrey)](#development-notes)
+[![Coverage](https://img.shields.io/badge/coverage-not%20tracked-lightgrey)](#development-notes)
+
 This repository powers the Burl-Fret Discord bots project. The long-term goal is to run two bots—**Bumbles** (`!`) and **DiscoCowboy** (`?`)—from a shared codebase. The current code is still the legacy single-bot implementation in `index.js`, and a migration to a dual-bot, Discord.js v14 architecture is planned.
 
 ## Status
