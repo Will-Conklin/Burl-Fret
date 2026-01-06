@@ -21,7 +21,7 @@ docs/
 node_modules/
 npm-debug.log*
 
-# Build artifacts
+# Build artifacts (will be built in container)
 dist/
 build/
 
@@ -40,6 +40,8 @@ tests/
 test/
 *.test.js
 *.spec.js
+*.test.ts
+*.spec.ts
 coverage/
 
 # Temporary files
@@ -51,11 +53,5 @@ temp/
 .DS_Store
 Thumbs.db
 
-# Fly.io
+# Fly.io runtime
 .fly/
-fly.toml
-
-# Docker
-Dockerfile
-.dockerignore
-docker-compose.yml

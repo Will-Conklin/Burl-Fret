@@ -30,6 +30,14 @@ dist/
 build/
 *.tsbuildinfo
 
+# Generated TypeScript files (should only be in dist/)
+**/*.d.ts
+**/*.d.ts.map
+**/*.js.map
+# Exclude root files like index.js (legacy)
+!index.js
+!*.config.js
+
 # IDE and Editor files
 .vscode/
 .idea/
