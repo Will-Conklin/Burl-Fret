@@ -49,15 +49,65 @@ export class HealthCheckServer {
     // Health check endpoint
     this.app.get('/health', (_req: Request, res: Response) => {
       const uptime = Math.floor((Date.now() - this.startTime) / 1000);
-      const status = {
-        status: 'healthy',
+      const memoryUsed = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+      const memoryLimit = 450; // 450MB threshold (out of 512MB allocated)
+
+      // Check if any bots are registered
+      if (this.botStatuses.size === 0) {
+        res.status(503).json({
+          status: 'unhealthy',
+          reason: 'No bots registered',
+          uptime: uptime,
+          timestamp: new Date().toISOString()
+        });
+        this.logger.warn('Health check failed: No bots registered');
+        return;
+      }
+
+      // Check bot connection states
+      const botStatuses = this.getBotStatuses();
+      const allBotsHealthy = Object.entries(botStatuses).every(([_name, status]) => {
+        return status.ready && status.online;
+      });
+
+      // Check memory usage
+      const memoryHealthy = memoryUsed < memoryLimit;
+
+      // Check WebSocket ping (high latency indicates issues)
+      const allPingsHealthy = Object.values(botStatuses).every(status => {
+        return status.ping === null || status.ping < 1000; // 1 second threshold
+      });
+
+      const isHealthy = allBotsHealthy && memoryHealthy && allPingsHealthy;
+
+      const healthStatus = {
+        status: isHealthy ? 'healthy' : 'unhealthy',
         uptime: uptime,
         timestamp: new Date().toISOString(),
-        bots: this.getBotStatuses()
+        checks: {
+          bots: allBotsHealthy ? 'pass' : 'fail',
+          memory: memoryHealthy ? 'pass' : 'fail',
+          latency: allPingsHealthy ? 'pass' : 'fail'
+        },
+        bots: botStatuses,
+        memory: {
+          used: memoryUsed,
+          limit: memoryLimit,
+          unit: 'MB'
+        }
       };
 
-      res.status(200).json(status);
-      this.logger.debug('Health check requested', { uptime });
+      if (isHealthy) {
+        res.status(200).json(healthStatus);
+        this.logger.debug('Health check passed', { uptime });
+      } else {
+        res.status(503).json(healthStatus);
+        this.logger.warn('Health check failed', {
+          bots: allBotsHealthy,
+          memory: memoryHealthy,
+          latency: allPingsHealthy
+        });
+      }
     });
 
     // Ready check endpoint

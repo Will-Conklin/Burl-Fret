@@ -1,5 +1,8 @@
 import { Message, EmbedBuilder } from 'discord.js';
 import { BotCommand } from '../../shared/utils/commandLoader';
+import { createLogger } from '../../shared/utils/logger';
+
+const logger = createLogger('commands');
 
 /**
  * Do it command - Sends the classic "Do it for Burl Fret" message
@@ -35,7 +38,11 @@ const doitCommand: BotCommand = {
       }
 
     } catch (error) {
-      console.error('Doit command error:', error);
+      logger.error('Doit command error:', {
+        error: error,
+        user: message.author.tag,
+        guild: message.guild?.name
+      });
       // Fallback to simple text message if embed fails
       if (message.channel && 'send' in message.channel) {
         await message.channel.send('Do it for Burl Fret! https://cdn.discordapp.com/attachments/764971562205184002/767324313987579914/video0.mov')

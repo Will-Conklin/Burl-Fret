@@ -1,6 +1,9 @@
 import { Message, PermissionFlagsBits } from 'discord.js';
 import { BotCommand } from '../../shared/utils/commandLoader';
 import { createSuccessEmbed, createErrorEmbed } from '../../shared/utils/embedBuilder';
+import { createLogger } from '../../shared/utils/logger';
+
+const logger = createLogger('commands');
 
 /**
  * Set command - Changes a user's nickname
@@ -82,7 +85,11 @@ const setCommand: BotCommand = {
       });
 
     } catch (error) {
-      console.error('Set command error:', error);
+      logger.error('Set command error:', {
+        error: error,
+        user: message.author.tag,
+        guild: message.guild?.name
+      });
       await message.reply({
         embeds: [createErrorEmbed('Failed to change nickname. Please make sure I have the proper permissions and the user\'s role is lower than mine!')]
       }).catch(() => {
