@@ -1,5 +1,8 @@
 import { Message, EmbedBuilder } from 'discord.js';
 import { BotCommand } from '../../shared/utils/commandLoader';
+import { createLogger } from '../../shared/utils/logger';
+
+const logger = createLogger('commands');
 
 /**
  * Ping command - Shows bot latency and API response time
@@ -53,7 +56,11 @@ const pingCommand: BotCommand = {
       });
 
     } catch (error) {
-      console.error('Ping command error:', error);
+      logger.error('Ping command error:', {
+        error: error,
+        user: message.author.tag,
+        guild: message.guild?.name
+      });
       await message.reply('❌ Failed to calculate latency!').catch(() => {
         // Ignore errors when sending error message
       });

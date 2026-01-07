@@ -1,5 +1,8 @@
 import { Message, EmbedBuilder, Collection } from 'discord.js';
 import { BotCommand } from '../../shared/utils/commandLoader';
+import { createLogger } from '../../shared/utils/logger';
+
+const logger = createLogger('commands');
 
 /**
  * Help command - Displays list of available commands
@@ -125,7 +128,11 @@ const helpCommand: BotCommand = {
       await message.reply({ embeds: [embed] });
 
     } catch (error) {
-      console.error('Help command error:', error);
+      logger.error('Help command error:', {
+        error: error,
+        user: message.author.tag,
+        guild: message.guild?.name
+      });
       await message.reply('❌ Failed to display help information!').catch(() => {
         // Ignore errors when sending error message
       });
