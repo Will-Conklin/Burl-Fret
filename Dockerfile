@@ -2,7 +2,7 @@
 # Optimized for production deployment on fly.io
 
 # Stage 1: Build stage
-FROM node:18-alpine AS builder
+FROM node:25.6.0-alpine AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY src/ ./src/
 RUN npm run build
 
 # Stage 2: Production stage
-FROM node:18-alpine AS production
+FROM node:25.6.0-alpine AS production
 
 WORKDIR /app
 
